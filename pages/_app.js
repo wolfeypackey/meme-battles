@@ -11,12 +11,8 @@ function MyApp({ Component, pageProps }) {
   const network = WalletAdapterNetwork.Devnet;
   const endpoint = useMemo(() => clusterApiUrl(network), [network]);
 
-  const wallets = useMemo(
-    () => [
-      new PhantomWalletAdapter(),
-    ],
-    []
-  );
+  // Empty array lets wallet adapter auto-detect installed wallets
+  const wallets = useMemo(() => [], []);
 
   return (
     <ConnectionProvider endpoint={endpoint}>
