@@ -1,5 +1,5 @@
 import { query } from '../../../lib/db';
-import { settleBattle as settleBattleLib } from '../../../lib/pyth';
+import { settleBattle as settleBattleLib, getPythLatestPrice } from '../../../lib/pyth';
 import { distributeSettlementPoints } from '../../../lib/points';
 
 /**
@@ -26,21 +26,37 @@ export default async function handler(req, res) {
   try {
     const now = new Date();
 
-    // 1. Activate scheduled battles
+    // 1. Activate scheduled battles and fetch start prices
     const scheduledBattles = await query(
-      `SELECT id FROM battles
-       WHERE status = 'scheduled' AND starts_at <= $1`,
+      `SELECT
+         b.id,
+         ta.pyth_price_id as token_a_pyth_id,
+         tb.pyth_price_id as token_b_pyth_id
+       FROM battles b
+       JOIN tokens ta ON b.token_a = ta.mint
+       JOIN tokens tb ON b.token_b = tb.mint
+       WHERE b.status = 'scheduled' AND b.starts_at <= $1`,
       [now]
     );
 
     for (const battle of scheduledBattles.rows) {
       try {
+        // Fetch starting prices
+        const [priceAStart, priceBStart] = await Promise.all([
+          getPythLatestPrice(battle.token_a_pyth_id),
+          getPythLatestPrice(battle.token_b_pyth_id),
+        ]);
+
+        // Activate battle and store start prices
         await query(
-          'UPDATE battles SET status = $1 WHERE id = $2',
-          ['active', battle.id]
+          `UPDATE battles
+           SET status = $1, price_a_start = $2, price_b_start = $3
+           WHERE id = $4`,
+          ['active', priceAStart, priceBStart, battle.id]
         );
+
         results.activated.push(battle.id);
-        console.log(`Activated battle ${battle.id}`);
+        console.log(`Activated battle ${battle.id} with start prices: A=${priceAStart}, B=${priceBStart}`);
       } catch (error) {
         console.error(`Error activating battle ${battle.id}:`, error);
         results.errors.push({ battleId: battle.id, action: 'activate', error: error.message });

@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Layout from '../../components/Layout';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { getBattle, submitPrediction } from '../../lib/api';
+import axios from 'axios';
 
 export default function BattleDetail() {
   const router = useRouter();
@@ -13,12 +14,38 @@ export default function BattleDetail() {
   const [loading, setLoading] = useState(true);
   const [selectedPick, setSelectedPick] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [livePrices, setLivePrices] = useState(null);
 
   useEffect(() => {
     if (id) {
       loadBattle();
     }
   }, [id]);
+
+  // Poll for live prices if battle is active
+  useEffect(() => {
+    if (!battle || battle.status !== 'active') {
+      return;
+    }
+
+    async function fetchLivePrices() {
+      try {
+        const API_BASE = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+        const response = await axios.get(`${API_BASE}/api/battles/${id}/prices`);
+        setLivePrices(response.data);
+      } catch (error) {
+        console.error('Error fetching live prices:', error);
+      }
+    }
+
+    // Fetch immediately
+    fetchLivePrices();
+
+    // Then poll every 10 seconds
+    const interval = setInterval(fetchLivePrices, 10000);
+
+    return () => clearInterval(interval);
+  }, [battle?.status, id]);
 
   async function loadBattle() {
     try {
@@ -138,17 +165,36 @@ export default function BattleDetail() {
                 selectedPick === 'A'
                   ? 'border-purple-500 bg-purple-900/30'
                   : 'border-gray-700 hover:border-gray-600'
-              } ${!canPredict ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+              } ${!canPredict ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${
+                livePrices?.currentLeader === 'A' ? 'ring-2 ring-green-500' : ''
+              }`}
             >
               <div className="text-3xl font-bold text-purple-400 mb-2">
                 {battle.token_a_symbol}
+                {livePrices?.currentLeader === 'A' && <span className="ml-2 text-green-400">👑</span>}
               </div>
               <div className="text-sm text-gray-400 mb-4">{battle.token_a_name}</div>
+
+              {/* Live prices for active battles */}
+              {battle.status === 'active' && livePrices?.tokenA && (
+                <div className="mb-2">
+                  <div className="text-xs text-gray-500 mb-1">Current Price</div>
+                  <div className="text-lg font-mono">${livePrices.tokenA.priceCurrent?.toFixed(6) || '...'}</div>
+                  {livePrices.tokenA.deltaPercent !== null && (
+                    <div className={`text-xl font-bold mt-2 ${livePrices.tokenA.deltaPercent >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {livePrices.tokenA.deltaPercent >= 0 ? '+' : ''}{livePrices.tokenA.deltaPercent.toFixed(2)}%
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Final results for settled battles */}
               {isSettled && battle.delta_a_pct !== null && (
                 <div className={`text-xl font-bold ${battle.delta_a_pct >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                   {battle.delta_a_pct >= 0 ? '+' : ''}{parseFloat(battle.delta_a_pct).toFixed(2)}%
                 </div>
               )}
+
               <div className="mt-4 text-sm text-gray-400">
                 {battle.pick_a_count || 0} predictions
               </div>
@@ -162,17 +208,36 @@ export default function BattleDetail() {
                 selectedPick === 'B'
                   ? 'border-pink-500 bg-pink-900/30'
                   : 'border-gray-700 hover:border-gray-600'
-              } ${!canPredict ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+              } ${!canPredict ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${
+                livePrices?.currentLeader === 'B' ? 'ring-2 ring-green-500' : ''
+              }`}
             >
               <div className="text-3xl font-bold text-pink-400 mb-2">
                 {battle.token_b_symbol}
+                {livePrices?.currentLeader === 'B' && <span className="ml-2 text-green-400">👑</span>}
               </div>
               <div className="text-sm text-gray-400 mb-4">{battle.token_b_name}</div>
+
+              {/* Live prices for active battles */}
+              {battle.status === 'active' && livePrices?.tokenB && (
+                <div className="mb-2">
+                  <div className="text-xs text-gray-500 mb-1">Current Price</div>
+                  <div className="text-lg font-mono">${livePrices.tokenB.priceCurrent?.toFixed(6) || '...'}</div>
+                  {livePrices.tokenB.deltaPercent !== null && (
+                    <div className={`text-xl font-bold mt-2 ${livePrices.tokenB.deltaPercent >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {livePrices.tokenB.deltaPercent >= 0 ? '+' : ''}{livePrices.tokenB.deltaPercent.toFixed(2)}%
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Final results for settled battles */}
               {isSettled && battle.delta_b_pct !== null && (
                 <div className={`text-xl font-bold ${battle.delta_b_pct >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                   {battle.delta_b_pct >= 0 ? '+' : ''}{parseFloat(battle.delta_b_pct).toFixed(2)}%
                 </div>
               )}
+
               <div className="mt-4 text-sm text-gray-400">
                 {battle.pick_b_count || 0} predictions
               </div>

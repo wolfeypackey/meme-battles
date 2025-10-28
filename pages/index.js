@@ -198,14 +198,10 @@ export default function Home() {
       )}
 
       {/* Quick Stats */}
-      <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-gray-800 rounded-lg p-6 text-center">
           <div className="text-3xl font-bold text-purple-400 mb-2">{battles.length}</div>
           <div className="text-gray-400">Active Battles</div>
-        </div>
-        <div className="bg-gray-800 rounded-lg p-6 text-center">
-          <div className="text-3xl font-bold text-pink-400 mb-2">0</div>
-          <div className="text-gray-400">Your Points</div>
         </div>
         <div className="bg-gray-800 rounded-lg p-6 text-center">
           <div className="text-3xl font-bold text-green-400 mb-2">Free</div>
