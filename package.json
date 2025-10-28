@@ -15,14 +15,14 @@
     "@solana/wallet-adapter-wallets": "^0.19.32",
     "@solana/web3.js": "^1.87.6",
     "axios": "^1.6.2",
+    "bs58": "^5.0.0",
     "jsonwebtoken": "^9.0.2",
     "next": "14.0.4",
-    "pg": "^8.11.3",
+    "pg": "^8.16.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "tweetnacl": "^1.0.3",
-    "bs58": "^5.0.0",
-    "sharp": "^0.33.1"
+    "sharp": "^0.33.1",
+    "tweetnacl": "^1.0.3"
   },
   "devDependencies": {
     "@types/node": "^20.10.5",

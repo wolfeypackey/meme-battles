@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
-import { getNonce, verifySignature } from '../lib/api';
+import { getNonce, verifySignature, getUserPoints, getAuthToken, clearAuthToken } from '../lib/api';
 import bs58 from 'bs58';
 
 export default function Layout({ children }) {
@@ -10,11 +10,51 @@ export default function Layout({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userPoints, setUserPoints] = useState(0);
 
+  // Check for existing auth token on mount
   useEffect(() => {
-    if (connected && publicKey && signMessage && !isAuthenticated) {
-      handleAuth();
+    const token = getAuthToken();
+    if (token && connected && publicKey) {
+      setIsAuthenticated(true);
+      fetchUserPoints();
+    }
+  }, []);
+
+  // Handle wallet connection/disconnection
+  useEffect(() => {
+    if (connected && publicKey && signMessage) {
+      const token = getAuthToken();
+      if (!token) {
+        // No token, need to authenticate
+        handleAuth();
+      } else {
+        // Have token, just fetch points
+        setIsAuthenticated(true);
+        fetchUserPoints();
+      }
+    } else if (!connected) {
+      // Wallet disconnected, clear auth state
+      setIsAuthenticated(false);
+      setUserPoints(0);
+      clearAuthToken();
     }
   }, [connected, publicKey]);
+
+  async function fetchUserPoints() {
+    try {
+      const data = await getUserPoints();
+      setUserPoints(data.points);
+    } catch (error) {
+      console.error('Error fetching points:', error);
+      // If token is invalid, clear it and re-auth
+      if (error.response?.status === 401) {
+        clearAuthToken();
+        setIsAuthenticated(false);
+        if (connected && publicKey && signMessage) {
+          handleAuth();
+        }
+      }
+    }
+  }
 
   async function handleAuth() {
     try {
@@ -40,9 +80,8 @@ export default function Layout({ children }) {
         alert(`Welcome! You've received 50 bonus points!`);
       }
 
-      // Fetch user points (you'd add this API endpoint)
-      // For now, we'll just set to 0
-      setUserPoints(0);
+      // Fetch user points
+      await fetchUserPoints();
     } catch (error) {
       console.error('Authentication error:', error);
       alert('Failed to authenticate. Please try again.');
