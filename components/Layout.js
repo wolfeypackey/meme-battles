@@ -37,7 +37,7 @@ export default function Layout({ children }) {
       setIsAuthenticated(true);
 
       if (authData.isNewUser) {
-        alert(`Welcome! You've received ${process.env.NEXT_PUBLIC_JOIN_BONUS || 50} bonus points!`);
+        alert(`Welcome! You've received 50 bonus points!`);
       }
 
       // Fetch user points (you'd add this API endpoint)
