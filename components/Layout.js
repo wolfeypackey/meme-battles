@@ -112,14 +112,8 @@ export default function Layout({ children }) {
               </nav>
             </div>
 
-            {/* Wallet & Points */}
+            {/* Wallet */}
             <div className="flex items-center space-x-4">
-              {isAuthenticated && (
-                <div className="hidden md:block px-4 py-2 bg-gray-800 rounded-lg">
-                  <span className="text-sm text-gray-400">Points:</span>
-                  <span className="ml-2 font-bold text-purple-400">{userPoints}</span>
-                </div>
-              )}
               <WalletMultiButton />
             </div>
           </div>

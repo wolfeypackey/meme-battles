@@ -50,7 +50,10 @@ async function handler(req, res) {
     // Delete used nonce
     await query('DELETE FROM auth_nonces WHERE wallet = $1', [wallet]);
 
-    // Update last login
+    // Award join bonus if new user (check BEFORE creating user record)
+    const isNewUser = await awardJoinBonusIfNew(wallet);
+
+    // Update last login (this will create user if doesn't exist)
     await query(
       `INSERT INTO users (wallet, last_login)
        VALUES ($1, NOW())
@@ -58,9 +61,6 @@ async function handler(req, res) {
        DO UPDATE SET last_login = NOW()`,
       [wallet]
     );
-
-    // Award join bonus if new user
-    const isNewUser = await awardJoinBonusIfNew(wallet);
 
     // Generate JWT
     const token = generateToken(wallet);

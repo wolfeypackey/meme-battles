@@ -48,6 +48,15 @@ async function handler(req, res) {
       return res.status(400).json({ error: 'Prediction cutoff has passed' });
     }
 
+    // Check if prediction already exists
+    const existingPrediction = await query(
+      'SELECT pick FROM predictions WHERE battle_id = $1 AND wallet = $2',
+      [battleId, wallet]
+    );
+
+    const isNewPrediction = existingPrediction.rows.length === 0;
+    const isChangingPick = existingPrediction.rows.length > 0 && existingPrediction.rows[0].pick !== pick;
+
     // Insert or update prediction
     const result = await query(
       `INSERT INTO predictions (battle_id, wallet, pick)
@@ -58,8 +67,7 @@ async function handler(req, res) {
       [battleId, wallet, pick]
     );
 
-    // Award participation points (only on first prediction)
-    const isNewPrediction = result.rowCount === 1;
+    // Award participation points only on first prediction for this battle
     if (isNewPrediction) {
       await awardParticipationPoints(wallet, battleId);
     }
