@@ -14,7 +14,9 @@ async function checkBattles() {
         ends_at,
         NOW() as current_time,
         token_a,
-        token_b
+        token_b,
+        price_a_start,
+        price_b_start
       FROM battles
       ORDER BY starts_at;
     `);
@@ -34,6 +36,8 @@ async function checkBattles() {
         console.log(`  Token B: ${battle.token_b}`);
         console.log(`  Starts: ${battle.starts_at}`);
         console.log(`  Ends: ${battle.ends_at}`);
+        console.log(`  Price A Start: ${battle.price_a_start || 'NOT SET'}`);
+        console.log(`  Price B Start: ${battle.price_b_start || 'NOT SET'}`);
         console.log(`  Current DB time: ${battle.current_time}`);
         console.log('');
       });

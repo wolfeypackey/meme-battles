@@ -266,6 +266,61 @@ export default function HowItWorks() {
           </div>
         </div>
 
+        {/* Security */}
+        <div className="bg-gray-800 rounded-lg p-8 mb-8">
+          <h2 className="text-2xl font-bold mb-4">🔒 Is It Safe to Connect My Wallet?</h2>
+
+          <div className="bg-green-900/20 border border-green-500 rounded-lg p-6 mb-6">
+            <p className="text-green-400 font-bold mb-2">✅ YES - 100% Safe</p>
+            <p className="text-gray-300 text-sm">
+              Meme Battles only asks you to <strong>sign a text message</strong> to prove you own your wallet.
+              We never request transaction approvals, token permissions, or access to your private keys.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-bold mb-2 text-green-400">What We DO</h3>
+              <ul className="text-gray-300 text-sm space-y-1 list-disc list-inside">
+                <li>Ask you to sign a simple text message for authentication</li>
+                <li>Read your public wallet address (visible to everyone on blockchain)</li>
+                <li>Store your points in our off-chain database</li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-bold mb-2 text-red-400">What We CANNOT Do</h3>
+              <ul className="text-gray-300 text-sm space-y-1 list-disc list-inside">
+                <li>Transfer SOL or tokens from your wallet</li>
+                <li>Approve token spending on your behalf</li>
+                <li>Sign transactions without your explicit approval</li>
+                <li>Access your private keys or seed phrase</li>
+              </ul>
+            </div>
+
+            <div className="bg-gray-900 p-4 rounded-lg">
+              <h3 className="font-bold mb-2">The Message You Sign:</h3>
+              <code className="text-xs text-gray-400 block whitespace-pre">
+{`Sign this message to authenticate with Meme Battles:
+
+Nonce: [random string]
+Wallet: [your wallet address]`}
+              </code>
+              <p className="text-gray-400 text-xs mt-2">
+                This is just text - not a transaction. Signing proves you own the wallet without moving any funds.
+              </p>
+            </div>
+
+            <div className="bg-blue-900/20 border border-blue-500 rounded-lg p-4">
+              <p className="text-blue-400 font-bold text-sm mb-1">Same Method Used By:</p>
+              <p className="text-gray-300 text-sm">
+                OpenSea, Magic Eden, Jupiter, and other trusted Web3 platforms use this exact authentication method
+                called "Sign-In with Solana" (SIWS).
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* CTA */}
         <div className="bg-gradient-to-r from-purple-900 to-pink-900 border border-purple-500 rounded-lg p-8 text-center">
           <h2 className="text-2xl font-bold mb-4">Ready to Battle?</h2>
