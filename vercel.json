@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/manage-battles",
       "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron/schedule-daily-battles",
+      "schedule": "0 0 * * *"
     }
   ]
 }
